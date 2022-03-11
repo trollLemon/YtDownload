@@ -9,6 +9,10 @@ use eframe::{
     epi::App,
 };
 
+use rustube::Video;
+
+use crate::yt_downloader::yt_downloader::{self, download_audio, download_video, VideoTarget};
+
 pub struct YoutubeVidDownloader {
     input: String,
     download_to: String,
@@ -22,6 +26,7 @@ impl Default for YoutubeVidDownloader {
         }
     }
 }
+
 impl App for YoutubeVidDownloader {
     fn update(&mut self, ctx: &egui::Context, _frame: &eframe::epi::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -53,7 +58,12 @@ impl App for YoutubeVidDownloader {
         egui::SidePanel::right("side_panel").show(ctx, |ui| {
             ui.add_space(50.0);
             if ui.button("Download").clicked() {
-                println!("IMPLEMENT ME");
+                let url = &mut self.input;
+                let path = &mut self.download_to;
+
+                let video = VideoTarget::new(url.to_string(), path.to_string());
+
+                yt_downloader::download_video(video);
             }
 
             ui.add_space(30.0);
