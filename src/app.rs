@@ -1,4 +1,18 @@
 /*
+
+figure out the operating system and adjust the default install location
+*/
+mod get_os {
+    pub fn determine_default_path() -> &'static str {
+        if cfg!(windows) {
+            "C:\\Users\\*user name*\\Downloads"
+        } else {
+            "/home/*user name*/Downloads/"
+        }
+    }
+}
+
+/*
     Renders all of the GUI stuff
 */
 
@@ -9,20 +23,25 @@ use eframe::{
     epi::App,
 };
 
-use rustube::Video;
-
-use crate::yt_downloader::yt_downloader::{self, download_audio, download_video, VideoTarget};
+use crate::yt_downloader::yt_downloader::{self, VideoTarget};
+use poll_promise::Promise;
+use rustube::Result;
+use std::path::PathBuf;
 
 pub struct YoutubeVidDownloader {
     input: String,
     download_to: String,
+    task: Option<poll_promise::Promise<Result<PathBuf>>>,
+    download_video: bool,
 }
 
 impl Default for YoutubeVidDownloader {
     fn default() -> Self {
         Self {
             input: "url".to_owned(),
-            download_to: "~/Downloads".to_owned(),
+            download_to: get_os::determine_default_path().to_owned(),
+            task: None::<Promise<Result<PathBuf>>>,
+            download_video: true,
         }
     }
 }
@@ -37,10 +56,24 @@ impl App for YoutubeVidDownloader {
             ui.add_space(10.0);
 
             ui.text_edit_singleline(&mut self.input);
-            ui.add_space(10.0);
 
+            ui.add_space(10.0);
             ui.label("Download Location");
             ui.text_edit_singleline(&mut self.download_to);
+
+            match &self.task {
+                Some(promise) => match promise.poll() {
+                    std::task::Poll::Ready(_) => {
+                        ui.colored_label(egui::Color32::DARK_BLUE, "downloaded!");
+                    }
+                    std::task::Poll::Pending => {
+                        ui.add(egui::Spinner::new());
+                    }
+                },
+                None => {
+                    ui.colored_label(egui::Color32::DARK_BLUE, "download something");
+                }
+            }
         });
 
         egui::TopBottomPanel::top("top_pannel").show(ctx, |ui| {
@@ -52,24 +85,34 @@ impl App for YoutubeVidDownloader {
                 "<-- Github repo -->",
                 "https://github.com/trollLemon/YtDownload",
             );
-            //TODO: add status box and progress bar
         });
 
         egui::SidePanel::right("side_panel").show(ctx, |ui| {
             ui.add_space(50.0);
+            ui.radio_value(&mut self.download_video, true, "Download Video");
+            ui.radio_value(&mut self.download_video, false, "Download audio");
             if ui.button("Download").clicked() {
                 let url = &mut self.input;
                 let path = &mut self.download_to;
-
                 let video = VideoTarget::new(url.to_string(), path.to_string());
 
-                yt_downloader::download_video(video);
+                if self.download_video {
+                    self.task = Some(Promise::spawn_async(async move {
+                        yt_downloader::download_video(video).await
+                    }));
+                } else {
+                    self.task = Some(Promise::spawn_async(async move {
+                        yt_downloader::download_audio(video).await
+                    }));
+                }
             }
 
-            ui.add_space(30.0);
+            ui.add_space(5.0);
 
             if ui.button("Choose Download Location").clicked() {
-                println!("IMPLEMENT ME");
+                if let Some(path) = rfd::FileDialog::new().pick_folder() {
+                    self.download_to = path.display().to_string();
+                }
             }
         });
     }
