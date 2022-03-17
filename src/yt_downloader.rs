@@ -1,8 +1,5 @@
 pub mod yt_downloader {
 
-    //TODO: indicate to front end if the video failed to download
-    //TODO: also make a duplicate of
-
     use rustube::url::Url;
     use rustube::Result;
 
