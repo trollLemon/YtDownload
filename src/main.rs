@@ -1,9 +1,14 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // this will hide console window on Windows in release
+
+
+
 mod app;
 mod yt_downloader;
 
 use app::YoutubeVidDownloader;
 use eframe::{egui::vec2, run_native, NativeOptions};
 use tokio;
+
 
 #[tokio::main]
 async fn main() {
