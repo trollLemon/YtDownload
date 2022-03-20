@@ -51,7 +51,7 @@ impl App for YoutubeVidDownloader {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.add_space(30.0);
             ui.style_mut().override_text_style = Some(egui::TextStyle::Heading);
-            ui.visuals_mut().override_text_color = Some(egui::Color32::DARK_BLUE);
+            ui.visuals_mut().override_text_color = Some(egui::Color32::RED);
             ui.label("URL");
             ui.add_space(10.0);
 
@@ -62,16 +62,22 @@ impl App for YoutubeVidDownloader {
             ui.text_edit_singleline(&mut self.download_to);
 
             match &self.task {
-                Some(promise) => match promise.poll() {
-                    std::task::Poll::Ready(_) => {
-                        ui.colored_label(egui::Color32::DARK_BLUE, "downloaded!");
+                Some(promise) => {
+                    if !self.input.contains("https://www.youtube.com/") {
+                        ui.colored_label(egui::Color32::RED, "not a link to a Youtube Video");
+                    } else {
+                        match promise.poll() {
+                            std::task::Poll::Ready(_) => {
+                                ui.colored_label(egui::Color32::RED, "downloaded!");
+                            }
+                            std::task::Poll::Pending => {
+                                ui.add(egui::Spinner::new());
+                            }
+                        }
                     }
-                    std::task::Poll::Pending => {
-                        ui.add(egui::Spinner::new());
-                    }
-                },
+                }
                 None => {
-                    ui.colored_label(egui::Color32::DARK_BLUE, "download something");
+                    ui.colored_label(egui::Color32::RED, "download something");
                 }
             }
         });
