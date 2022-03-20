@@ -3,6 +3,8 @@ A GUIApp to download youtube videos
 
 To use, either run the pre compiled binaries included in the releases, or compile and run the app yourself (see Instalation & usage)
 
+On linux, you will run ```bash $ chmod +x yt_download``` in order to be able to run the app.
+
 
 ## Installation & Usage
 
