@@ -8,7 +8,7 @@ On linux, you will run ```bash $ chmod +x yt_download``` in order to be able to 
 
 ## Installation & Usage
 
-### Windows
+### Windows & linux
 You have to run it on the nightly channel:
 ```bash
 $ cargo +nightly run
