@@ -1,4 +1,4 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // this will hide console window on Windows in release
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // this will hide the console window on Windows
 
 
 
