@@ -1,6 +1,9 @@
 # YtDownload
 A GUIApp to download youtube videos
 
+To use, either run the pre compiled binaries included in the releases, or compile and run the app yourself (see Instalation & usage)
+
+
 ## Installation & Usage
 
 ### Windows
